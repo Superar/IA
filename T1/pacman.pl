@@ -3,10 +3,10 @@
 % % Alterar apenas esta parte do codigo para adaptar o jogo
 
 
-%% dimensoes(+M, +N)
-% Representa as dimensoes M e N do tabuleiro.
-% M eh o numero de posicoes horizontais.
-% N eh o numero de posicoes verticais
+%% dimensoes(+Largura, +Altura)
+% Representa as dimensoes Largura e Altura do tabuleiro.
+% Largura eh o numero de posicoes horizontais.
+% Altura eh o numero de posicoes verticais
 dimensoes(5, 5).
 
 %% posicao(+Objeto, +X, +Y)
@@ -44,20 +44,22 @@ posicao(fantasma, [[0, 3], [1, 1], [3, 2], [3, 4]]).
 % Os estados Sucessores podem ser obtidos pela movimentacao
 % do pacman em todas as quatro direções:
 % direita, esquerda, cima e baixo
-s(Estado, Sucessor) :- move_direita(Estado, Sucessor).
+s(Estado, Sucessor) :- move_direita(Estado, Sucessor);
+                       move_esquerda(Estado, Sucessor);
+                       move_cima(Estado, Sucessor);
+                       move_baixo(Estado, Sucessor).
 
-%% move_direita(+Estado, ?Sucessor)
-% Sucessor representa o Estado apos o Pacman se mover para a direita
+%% move_<direcao>(+Estado, ?Sucessor)
+% Sucessor representa o Estado apos o Pacman se mover para a <direcao>
 % A condicao principal para a movimentacao eh
-% haver espaco ao lado do Pacman, ou seja, ele nao se enconta na borda
-% do tabuleiro
+% haver espaco livre para onde o Pacman ira andar
 % Existem tambem outras duas condicoes:
 %   Pacman nao pode comer fantasmas, portanto nao pode passar por eles
 %   Pacman pode comer fantasmas, estando livre para se mover
 move_direita(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
-                                  dimensoes(M, _),
+                                  dimensoes(Largura, _),
                                   % Ha espaco livre a direita de X
-                                  X < M-1,
+                                  X < Largura-1,
                                   XNext is X+1,
                                   % Pacman nao pode comer fantasmas
                                   not(come_fantasmas(Estado)),
@@ -65,18 +67,69 @@ move_direita(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
                                   not(coordenadas(fantasma, Estado, XNext, Y)),
                                   indice(X, Y, Indice),
                                   indice(XNext, Y, IndiceNext),
-                                  troca(Indice, IndiceNext, Estado, Sucessor);
+                                  troca(Indice, IndiceNext, Estado, Sucessor), !;
 
                                   % Ha fantasma a direta do Pacman, porem
                                   % o personagem pode come-los
                                   coordenadas(pacman, Estado, X, Y),
-                                  dimensoes(M, _),
-                                  X < M-1,
+                                  dimensoes(Largura, _),
+                                  X < Largura-1,
                                   XNext is X+1,
                                   come_fantasmas(Estado),
                                   indice(X, Y, Indice),
                                   indice(XNext, Y, IndiceNext),
                                   troca(Indice, IndiceNext, Estado, Sucessor).
+
+move_esquerda(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
+                                X > 0,
+                                XNext is X-1,
+                                not(come_fantasmas(Estado)),
+                                not(coordenadas(fantasma, Estado, XNext, Y)),
+                                indice(X, Y, Indice),
+                                indice(XNext, Y, IndiceNext),
+                                troca(Indice, IndiceNext, Estado, Sucessor), !;
+
+                                coordenadas(pacman, Estado, X, Y),
+                                X > 0,
+                                XNext is X-1,
+                                come_fantasmas(Estado),
+                                indice(X, Y, Indice),
+                                indice(XNext, Y, IndiceNext),
+                                troca(Indice, IndiceNext, Estado, Sucessor).
+
+move_cima(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
+                               Y > 0,
+                               YNext is Y-1,
+                               not(come_fantasmas(Estado)),
+                               not(coordenadas(fantasmas, Estado, X, YNext)),
+                               indice(X, Y, Indice),
+                               indice(X, YNext, IndiceNext),
+                               troca(Indice, IndiceNext, Estado, Sucessor), !;
+
+                               coordenadas(pacman, Estado, X, Y),
+                               Y > 0,
+                               YNext is Y-1,
+                               indice(X, Y, Indice),
+                               indice(X, YNext, IndiceNext),
+                               troca(Indice, IndiceNext, Estado, Sucessor).
+
+move_baixo(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
+                              dimensoes(_, Altura),
+                              Y < Altura-1,
+                              YNext is Y+1,
+                              not(come_fantasmas(Estado)),
+                              not(coordenadas(fantasmas, Estado, X, YNext)),
+                              indice(X, Y, Indice),
+                              indice(X, YNext, IndiceNext),
+                              troca(Indice, IndiceNext, Estado, Sucessor), !;
+
+                              coordenadas(pacman, Estado, X, Y),
+                              dimensoes(_, Altura),
+                              Y < Altura-1,
+                              YNext is Y+1,
+                              indice(X, Y, Indice),
+                              indice(X, YNext, IndiceNext),
+                              troca(Indice, IndiceNext, Estado, Sucessor).
 
 
 % % % Funcoes auxiliares
@@ -95,14 +148,14 @@ come_fantasmas(Estado) :- posicao(ponto, PontoX, PontoY),
 % As coordenadas sao as posicoes de Objeto no Tabuleiro representado
 % dentro do Estado, conforme descrito acima
 coordenadas(Objeto, Estado, X, Y) :- nth0(Posicao, Estado, Objeto),
-                                     dimensoes(M, _),
-                                     X is Posicao mod M,
-                                     Y is Posicao div M.
+                                     dimensoes(Largura, _),
+                                     X is Posicao mod Largura,
+                                     Y is Posicao div Largura.
 
 %% indice(+X, +Y, ?Indice)
 % Remonta o indice na lista a partir das coordenadas de um Objeto
-indice(X, Y, Indice) :- dimensoes(M, _),
-                        Indice is M*Y+X.
+indice(X, Y, Indice) :- dimensoes(Largura, _),
+                        Indice is Largura*Y+X.
 
 %% troca(+Indice, +IndiceNext, +Estado, ?Sucessor)
 % Troca o objeto em Indice com o objeto em IndiceNext
@@ -155,8 +208,8 @@ add_vazios([Cabeca|Cauda], [Cabeca|CaudaNext]) :- atom(Cabeca),
 
 %% cria_tabuleiro(?Tabuleiro)
 % Cria o Tabuleiro e inicializa todos os objetos
-cria_tabuleiro(Tabuleiro) :- dimensoes(M, N),
-                             Length is M*N,
+cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
+                             Length is Largura*Altura,
                              length(TabuleiroTemp, Length),
                              add_objeto(pacman, TabuleiroTemp),
                              add_objeto(fantasma, TabuleiroTemp),
