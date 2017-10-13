@@ -192,9 +192,9 @@ add_fantasmas(_, []) :- !.
 add_fantasmas(Tabuleiro, [[X, Y] | Cauda]) :- coordenadas(fantasma, Tabuleiro, X, Y),
                                               add_fantasmas(Tabuleiro, Cauda).
 
-%% add_vazios(+?Tabuleiro)
+%% add_vazios(+Tabuleiro, ?TabuleiroPreenchido)
 % Insere nas posicoes nao preenchidas do Tabuleiro (com _)
-% o valor atomico 'vazio'
+% o valor atomico 'vazio', retornando em TrabuleiroPreenchido
 add_vazios([], []) :- !.
 add_vazios([Cabeca|Cauda], [vazio|CaudaNext]) :- not(atom(Cabeca)),
                               add_vazios(Cauda, CaudaNext), !.
