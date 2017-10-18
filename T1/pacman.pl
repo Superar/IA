@@ -272,6 +272,7 @@ cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
 % % Meta: Qualquer estado em que o pacman esteja na mesma posicao que a cereja
 
 meta(Estado) :- coordenadas(pacman, Estado, X, Y),
+                come_fantasmas(Estado),
                 posicao(cereja, X, Y).
 
 busca_profundidade(Estado, Caminho, [Estado|Caminho]) :- meta(Estado), !.
@@ -279,14 +280,22 @@ busca_profundidade(Estado, Caminho, Solucao) :- s(Estado, Sucessor),
                                                 not(member(Sucessor, [Estado|Caminho])),
                                                 busca_profundidade(Sucessor, [Estado|Caminho], Solucao).
 
+escreve_ui([Estado], In) :- writeln(In, Estado), !.
+escreve_ui([Estado|OutrosEstados], In) :- writeln(In, Estado),
+                                          escreve_ui(OutrosEstados, In).
+
 %% main()
 % Funcao principal do programa
 % main() :- cria_tabuleiro(Estado),
 %           s(Estado, Sucessor),
 %           writeln(Sucessor).
 main(In) :- cria_tabuleiro(Estado),
-          busca_profundidade(Estado, [], Final),
-          writeln(In, Final).
+            dimensoes(Largura, Altura),
+            write(In, Largura),
+            write(In, 'x'),
+            writeln(In, Altura),
+            busca_profundidade(Estado, [], Final),
+            escreve_ui(Final, In).
 
 %% run()
 % Funcao para execucao do programa
