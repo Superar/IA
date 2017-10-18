@@ -23,7 +23,7 @@ for num_exec, line in enumerate(reversed(lines)):
             print('-----------------------------')
             print('|', end='')
             print('   ' + obj_map[elem], end='   ')
-        if i % dim[0] == dim[0] - 1:
+        elif i % dim[0] == dim[0] - 1:
             print(obj_map[elem], end='   ')
             print('|')
         else:
