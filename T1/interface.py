@@ -1,22 +1,28 @@
 import sys
 
 
-def convert_to_coordinates(state, dim):
-    coord_state = list()
-    i = 0
-    for elem in state:
-        coord_state.append((elem, i % dim[0], int(i / dim[0])))
-        i = i + 1
-    return coord_state
-
+obj_map = {'pacman': '<',
+           'vazio': '_',
+           'ponto': 'o',
+           'fantasma': 'x',
+           'cereja': 'C'}
 
 dim = sys.stdin.readline()
-dim = dim.translate({ord('\n'): None})
 dim = dim.split('x')
 dim = [int(axis) for axis in dim]
 
 lines = sys.stdin.readlines()
-for line in lines:
+for num_exec, line in enumerate(lines):
+    print('Execucao numero: ' + str(num_exec))
     line = line.translate({ord(c): None for c in '[]\n'})
-    coordenadas = convert_to_coordinates(line.split(','), dim)
-    print(coordenadas)
+    for i, elem in enumerate(line.split(',')):
+        if i % dim[0] == 0:
+            print('-----------------------------')
+            print('|', end='')
+            print('   ' + obj_map[elem], end='   ')
+        if i % dim[0] == dim[0] - 1:
+            print(obj_map[elem], end='   ')
+            print('|')
+        else:
+            print(obj_map[elem], end='   ')
+    print('-----------------------------')

@@ -225,11 +225,9 @@ main(In) :- cria_tabuleiro(Estado),
             dimensoes(Largura, Altura),
             write(In, Largura),
             write(In, 'x'),
-            write(In, Altura),
-            nl(In),
+            writeln(In, Altura),
             s(Estado, Sucessor),
-            write(In, Sucessor),
-            nl(In).
+            writeln(In, Sucessor).
 
 %% run()
 % Funcao para execucao do programa
