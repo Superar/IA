@@ -34,7 +34,6 @@ posicao(fantasma, [[0, 3], [1, 1], [3, 2], [3, 4]]).
 % %   pacman - indica que o personagem esta naquela posicao
 % %   fantasma - indica que ha um fantasma naquela posicao
 % %   ponto - indica que ha um ponto especial esta naquela posicao
-% %   comido - indica que o ponto especial ja foi comido
 % %   cereja - indica que a cereja esta naquela posicao
 % %   vazio - Indica que a posicao esta vazia
 
@@ -65,53 +64,75 @@ move_direita(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
                                   not(come_fantasmas(Estado)),
                                   % Nao ha fantasma a direita do Pacman
                                   not(coordenadas(fantasma, Estado, XNext, Y)),
+                                  % Verifica se a próxima posição e ponto
+                                  % Come ponto
+                                  (posicao(ponto, XNext, Y) ->
+                                      come_ponto(Estado, EstadoAux);
+                                      copy_term(Estado, EstadoAux)),
+                                  %Anda com o pacman
                                   indice(X, Y, Indice),
                                   indice(XNext, Y, IndiceNext),
-                                  troca(Indice, IndiceNext, Estado, Sucessor), !;
+                                  troca(Indice, IndiceNext, EstadoAux, Sucessor), !;
 
-                                  % Ha fantasma a direta do Pacman, porem
-                                  % o personagem pode come-los
+                                  % Pacman pode comer fantasmas, ponto especial
+                                  % ja foi comido
                                   coordenadas(pacman, Estado, X, Y),
                                   dimensoes(Largura, _),
                                   X < Largura-1,
                                   XNext is X+1,
                                   come_fantasmas(Estado),
+                                  (tem_fantasma(XNext, Y) ->
+                                      come_fantasma(Estado, X, Y, EstadoAux);
+                                      copy_term(Estado, EstadoAux)),
                                   indice(X, Y, Indice),
                                   indice(XNext, Y, IndiceNext),
-                                  troca(Indice, IndiceNext, Estado, Sucessor).
+                                  troca(Indice, IndiceNext, EstadoAux, Sucessor).
 
 move_esquerda(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
                                 X > 0,
                                 XNext is X-1,
                                 not(come_fantasmas(Estado)),
                                 not(coordenadas(fantasma, Estado, XNext, Y)),
+                                (posicao(ponto, XNext, Y) ->
+                                    come_ponto(Estado, EstadoAux);
+                                    copy_term(Estado, EstadoAux)),
                                 indice(X, Y, Indice),
                                 indice(XNext, Y, IndiceNext),
-                                troca(Indice, IndiceNext, Estado, Sucessor), !;
+                                troca(Indice, IndiceNext, EstadoAux, Sucessor), !;
 
                                 coordenadas(pacman, Estado, X, Y),
                                 X > 0,
                                 XNext is X-1,
                                 come_fantasmas(Estado),
+                                (tem_fantasma(XNext, Y) ->
+                                    come_fantasma(Estado, XNext, Y, EstadoAux);
+                                    copy_term(Estado, EstadoAux)),
                                 indice(X, Y, Indice),
                                 indice(XNext, Y, IndiceNext),
-                                troca(Indice, IndiceNext, Estado, Sucessor).
+                                troca(Indice, IndiceNext, EstadoAux, Sucessor).
 
 move_cima(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
                                Y > 0,
                                YNext is Y-1,
                                not(come_fantasmas(Estado)),
                                not(coordenadas(fantasmas, Estado, X, YNext)),
+                               (posicao(ponto, X, YNext) ->
+                                   come_ponro(Estado, EstadoAux);
+                                   copy_term(Estado, EstadoAux)),
                                indice(X, Y, Indice),
                                indice(X, YNext, IndiceNext),
-                               troca(Indice, IndiceNext, Estado, Sucessor), !;
+                               troca(Indice, IndiceNext, EstadoAux, Sucessor), !;
 
                                coordenadas(pacman, Estado, X, Y),
                                Y > 0,
                                YNext is Y-1,
+                               come_fantasmas(Estado),
+                               (tem_fantasma(X, YNext) ->
+                                   come_fantasma(Estado, X, YNext, EstadoAux);
+                                   copy_term(Estado, EstadoAux)),
                                indice(X, Y, Indice),
                                indice(X, YNext, IndiceNext),
-                               troca(Indice, IndiceNext, Estado, Sucessor).
+                               troca(Indice, IndiceNext, EstadoAux, Sucessor).
 
 move_baixo(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
                               dimensoes(_, Altura),
@@ -119,17 +140,24 @@ move_baixo(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
                               YNext is Y+1,
                               not(come_fantasmas(Estado)),
                               not(coordenadas(fantasmas, Estado, X, YNext)),
+                              (posicao(ponto, X, YNext) ->
+                                  come_ponto(Estado, X, YNext, EstadoAux);
+                                  copy_term(Estado, EstadoAux)),
                               indice(X, Y, Indice),
                               indice(X, YNext, IndiceNext),
-                              troca(Indice, IndiceNext, Estado, Sucessor), !;
+                              troca(Indice, IndiceNext, EstadoAux, Sucessor), !;
 
                               coordenadas(pacman, Estado, X, Y),
                               dimensoes(_, Altura),
                               Y < Altura-1,
                               YNext is Y+1,
+                              come_fantasmas(Estado),
+                              (tem_fantasma(X, YNext) ->
+                                  come_fantasma(Estado, X, YNext, EstadoAux);
+                                  copy_term(Estado, EstadoAux)),
                               indice(X, Y, Indice),
                               indice(X, YNext, IndiceNext),
-                              troca(Indice, IndiceNext, Estado, Sucessor).
+                              troca(Indice, IndiceNext, EstadoAux, Sucessor).
 
 
 % % % Funcoes auxiliares
@@ -141,7 +169,9 @@ move_baixo(Estado, Sucessor) :- coordenadas(pacman, Estado, X, Y),
 % Indica se eh possivel para o pacman comer fantasmas
 % isto eh, se o ponto especial ja foi comido
 come_fantasmas(Estado) :- posicao(ponto, PontoX, PontoY),
-                          coordenadas(comido, Estado, PontoX, PontoY).
+                          coordenadas(vazio, Estado, PontoX, PontoY);
+                          posicao(ponto, PontoX, PontoY),
+                          coordenadas(pacman, Estado, PontoX, PontoY).
 
 %% coordenadas(+Objeto, +Estado, ?X, ?Y)
 % Retorna as coordenadas X e Y de Objeto dentro de Estado
@@ -157,6 +187,12 @@ coordenadas(Objeto, Estado, X, Y) :- nth0(Posicao, Estado, Objeto),
 indice(X, Y, Indice) :- dimensoes(Largura, _),
                         Indice is Largura*Y+X.
 
+%% posicao(fantasma, +X, +Y)
+% Verifica se existe fantasma em (X,Y)
+tem_fantasma(X, Y) :- posicao(fantasma, L),
+                      is_list(L),
+                      member([X, Y], L).
+
 %% troca(+Indice, +IndiceNext, +Estado, ?Sucessor)
 % Troca o objeto em Indice com o objeto em IndiceNext
 % dentro de Estado, retornando o novo estado em Sucessor
@@ -171,6 +207,20 @@ troca(Indice, IndiceNext, Estado, Sucessor) :- same_length(Estado, Sucessor),
                                                append(ListaAnteriorIndiceNext, [ObjetoNext|ListaPosteriorIndiceNext], Aux),
                                                % Substitui elemento em IndiceNext pelo elemento em Indice
                                                append(ListaAnteriorIndiceNext, [Objeto|ListaPosteriorIndiceNext], Sucessor).
+
+%% come_ponto(+Estado, ?Sucessor)
+% Gera Sucessor trocando o ponto e Estado por vazio
+% Indicando que o ponto ja foi comido
+come_ponto([ponto|Cauda], [vazio|Cauda]) :- !.
+come_ponto([Cabeca|Cauda], [Cabeca|CaudaNext]) :- come_ponto(Cauda, CaudaNext).
+
+%% come_fantasma(+Estado, +X, +Y, ?Sucessor)
+% Substitui fantasma em X e Y por vazio
+come_fantasma(Estado, X, Y, Sucessor) :- same_length(Estado, Sucessor),
+                                         indice(X, Y, Indice),
+                                         length(ListaAnterior, Indice),
+                                         append(ListaAnterior, [_|ListaPosterior], Estado),
+                                         append(ListaAnterior, [vazio|ListaPosterior], Sucessor).
 
 %% add_objeto(fantasma, +?Tabuleiro)
 % Insere N fantasmas em Tabuleiro
@@ -217,22 +267,31 @@ cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
                              add_objeto(cereja, TabuleiroTemp),
                              add_vazios(TabuleiroTemp, Tabuleiro).
 
-%% main(+In)
+% % % Implementacao da busca
+% % Busca utilizada: Busca em profundidade
+% % Meta: Qualquer estado em que o pacman esteja na mesma posicao que a cereja
+
+meta(Estado) :- coordenadas(pacman, Estado, X, Y),
+                posicao(cereja, X, Y).
+
+busca_profundidade(Estado, Caminho, [Estado|Caminho]) :- meta(Estado), !.
+busca_profundidade(Estado, Caminho, Solucao) :- s(Estado, Sucessor),
+                                                not(member(Sucessor, [Estado|Caminho])),
+                                                busca_profundidade(Sucessor, [Estado|Caminho], Solucao).
+
+%% main()
 % Funcao principal do programa
-% In representa o pipe para comunicacao com o processo de interface
-% executando em python
+% main() :- cria_tabuleiro(Estado),
+%           s(Estado, Sucessor),
+%           writeln(Sucessor).
 main(In) :- cria_tabuleiro(Estado),
-            dimensoes(Largura, Altura),
-            write(In, Largura),
-            write(In, 'x'),
-            writeln(In, Altura),
-            s(Estado, Sucessor),
-            writeln(In, Sucessor).
+          busca_profundidade(Estado, [], Final),
+          writeln(In, Final).
 
 %% run()
 % Funcao para execucao do programa
 % Inicializa um procesos python para a interface e executa
 % o predicado main(In).
 run() :- setup_call_cleanup(process_create(path(python3), ['interface.py'],[stdin(pipe(In))]),
-                            main(In),
-                            close(In)).
+                          main(In),
+                          close(In)).
