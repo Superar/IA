@@ -267,8 +267,23 @@ cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
                              add_objeto(cereja, TabuleiroTemp),
                              add_vazios(TabuleiroTemp, Tabuleiro).
 
+% % % Implementacao da busca
+% % Busca utilizada: Busca em profundidade
+% % Meta: Qualquer estado em que o pacman esteja na mesma posicao que a cereja
+
+meta(Estado) :- coordenadas(pacman, Estado, X, Y),
+                posicao(cereja, X, Y).
+
+busca_profundidade(Estado, Caminho, [Estado|Caminho]) :- meta(Estado), !.
+busca_profundidade(Estado, Caminho, Solucao) :- s(Estado, Sucessor),
+                                                not(member(Sucessor, [Estado|Caminho])),
+                                                busca_profundidade(Sucessor, [Estado|Caminho], Solucao).
+
 %% main()
 % Funcao principal do programa
+% main() :- cria_tabuleiro(Estado),
+%           s(Estado, Sucessor),
+%           writeln(Sucessor).
 main() :- cria_tabuleiro(Estado),
-          s(Estado, Sucessor),
-          writeln(Sucessor).
+          busca_profundidade(Estado, [], Final),
+          writeln(Final).
