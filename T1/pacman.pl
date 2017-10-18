@@ -267,28 +267,39 @@ cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
                              add_objeto(cereja, TabuleiroTemp),
                              add_vazios(TabuleiroTemp, Tabuleiro).
 
+%% escreve_ui(+Lista, +In)
+% Escreve no arquivo In os estados em Lista
+% Os Estados sao escritos um por linha
+escreve_ui([Estado], In) :- writeln(In, Estado), !.
+escreve_ui([Estado|OutrosEstados], In) :- writeln(In, Estado),
+                                       escreve_ui(OutrosEstados, In).
+
 % % % Implementacao da busca
 % % Busca utilizada: Busca em profundidade
 % % Meta: Qualquer estado em que o pacman esteja na mesma posicao que a cereja
 
+%% meta(+Estado)
+% Indica se o estado e meta da busca
+% Estados meta sao estados em que o pacman ja comeu o ponto
+% e o pacman come a cereja (esta na mesma posicao)
 meta(Estado) :- coordenadas(pacman, Estado, X, Y),
                 come_fantasmas(Estado),
                 posicao(cereja, X, Y).
 
+%% busca_profundidade(+Estado, +Caminho, ?Solucao)
+% Realiza a busca em profundidade a partir do Estado,
+% que foi obtido atraves do Caminho percorrido
+% A Solucao retorna o caminho ate um estado meta
 busca_profundidade(Estado, Caminho, [Estado|Caminho]) :- meta(Estado), !.
 busca_profundidade(Estado, Caminho, Solucao) :- s(Estado, Sucessor),
                                                 not(member(Sucessor, [Estado|Caminho])),
                                                 busca_profundidade(Sucessor, [Estado|Caminho], Solucao).
 
-escreve_ui([Estado], In) :- writeln(In, Estado), !.
-escreve_ui([Estado|OutrosEstados], In) :- writeln(In, Estado),
-                                          escreve_ui(OutrosEstados, In).
-
 %% main()
 % Funcao principal do programa
-% main() :- cria_tabuleiro(Estado),
-%           s(Estado, Sucessor),
-%           writeln(Sucessor).
+% Tabuleiro e criado, informacoes para a interface sao inicializadas
+% e a busca em profundidade e iniciada
+% Ao final, todos os passos obtidos sao escritos para a interface
 main(In) :- cria_tabuleiro(Estado),
             dimensoes(Largura, Altura),
             write(In, Largura),
