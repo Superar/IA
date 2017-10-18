@@ -27,6 +27,9 @@ posicao(fantasma, [[0, 3], [1, 1], [3, 2], [3, 4]]).
 
 % % % % % % % % % % NAO ALTERAR A PARTIR DESTA LINHA % % % % % % % % % %
 
+% % % Importacao de modulos
+% Biblioteca process - Para utilizar os comandos de criacao de subprocessos
+:- use_module(library(process)).
 
 % % % Transicoes
 % % Estado: Lista que representa as posicoes do tabuleiro.
