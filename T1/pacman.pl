@@ -217,8 +217,24 @@ cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
                              add_objeto(cereja, TabuleiroTemp),
                              add_vazios(TabuleiroTemp, Tabuleiro).
 
-%% main()
+%% main(+In)
 % Funcao principal do programa
-main() :- cria_tabuleiro(Estado),
-          s(Estado, Sucessor),
-          write(Sucessor).
+% In representa o pipe para comunicacao com o processo de interface
+% executando em python
+main(In) :- cria_tabuleiro(Estado),
+            dimensoes(Largura, Altura),
+            write(In, Largura),
+            write(In, 'x'),
+            write(In, Altura),
+            nl(In),
+            s(Estado, Sucessor),
+            write(In, Sucessor),
+            nl(In).
+
+%% run()
+% Funcao para execucao do programa
+% Inicializa um procesos python para a interface e executa
+% o predicado main(In).
+run() :- setup_call_cleanup(process_create(path(python3), ['interface.py'],[stdin(pipe(In))]),
+                            main(In),
+                            close(In)).
