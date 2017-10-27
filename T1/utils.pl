@@ -67,6 +67,11 @@ come_fantasma(Estado, X, Y, Sucessor) :- same_length(Estado, Sucessor),
                                          append(ListaAnterior, [_|ListaPosterior], Estado),
                                          append(ListaAnterior, [vazio|ListaPosterior], Sucessor).
 
+%% come_cereja(+Estado, ?Sucessor)
+% Substitui a cereja em Estado por vazio
+come_cereja([cereja|Cauda], [vazio|Cauda]) :- !.
+come_cereja([Cabeca|Cauda], [Cabeca|CaudaNext]) :- come_cereja(Cauda, CaudaNext).
+
 %% add_objeto(fantasma, +?Tabuleiro)
 % Insere N fantasmas em Tabuleiro
 % em coordenadas indicadas nos parametros
