@@ -11,7 +11,7 @@
 :- [busca].
 
 
-%% main()
+%% main(+In)
 % Funcao principal do programa
 % Tabuleiro e criado, informacoes para a interface sao inicializadas
 % e a busca em profundidade e iniciada
