@@ -151,7 +151,7 @@ cria_tabuleiro(Tabuleiro) :- dimensoes(Largura, Altura),
 
 Para a realização desta criação, uma lista inicial de tamanho `Largura*Altura` é criada através do predicado `length(?List, ?Int)` com todas as suas posições iguais à variável anônima `_`, podendo ser unificado com qualquer valor.
 
-Após isso, são chamados diversos predicados do tipo `add_objeto(+Objeto, +?Tabuleiro)`.
+Após isso, são chamados diversos predicados do tipo `add_objeto(+Objeto, +?Tabuleiro)`, que insere os objetos desejados no tabuleiro criado por meio de unificação.
 
 ```prolog
 %% add_objeto(+Objeto, +?Tabuleiro)
