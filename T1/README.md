@@ -391,7 +391,7 @@ As implementações das transições dos estados e movimentações estão no arq
 
 A implementação da busca em profundidade segue o algoritmo mostrado em aula, com o aproveitamento do _backtracking_ presente internamente na linguagem Prolog. Sua implementação está no arquivo `busca.pl`.
 
-Todo algoritmo de busca necessida de um estado meta, qual o estado em que se deseja chegar ao realizar a busca. Quando a busca encontrar o estado meta, aplicando as transições indicadas, ela deve parar e retornar o resultado.
+Todo algoritmo de busca necessita de um estado meta, qual o estado em que se deseja chegar ao realizar a busca. Quando a busca encontrar o estado meta, aplicando as transições indicadas, ela deve parar e retornar o resultado.
 
 Neste trabalho, o estado meta é representado por qualquer estado em que não haja fantasmas, isto é, todos foram comidos, e o pacman esteja na mesma posição da cereja indicada nos parâmetros, mostrando que o pacman comeu a cereja (objetivo principal).
 
@@ -425,12 +425,12 @@ busca_profundidade(Estado, Caminho, Solucao) :- s(Estado, Sucessor),
 
 ### Utilidades
 
-Diversos predicados auxilires foram criados para a realização deste trabalho. Estes predicados estão implementados no arquivo `utils.pl`.
+Diversos predicados auxiliares foram criados para a realização deste trabalho. Estes predicados estão implementados no arquivo `utils.pl`.
 
 Os predicados de utilidade foram separados em diversas categorias. A primeira indica o retorno de informações sobre o estado passado como parâmetro. As informações retornadas são:
 
 - O pacman pode comer fantasmas apenas se o lugar onde o ponto deveria estar (indicado pelos parâmetros) tem vazio, indicando que o pacman já o comeu, ou se o pacman está, naquele exato estado, em cima do ponto, comendo-o.
-- As coordenadas de um dado objeto dentro de um dado estado. Este predicado busca a posição do objeto na lista e realiza os cálculos com relação às dimensões do tabuleiro para obter os valores das coordenadas. O predicado não trabalha bem com fantasmas (seriam relizados _backtrackings_), porém isto não é um problema, pois esta funcionalidade não é utilizada para obter coordenadas de fantasmas.
+- As coordenadas de um dado objeto dentro de um dado estado. Este predicado busca a posição do objeto na lista e realiza os cálculos com relação às dimensões do tabuleiro para obter os valores das coordenadas. O predicado não trabalha bem com fantasmas (seriam realizados _backtrackings_), porém isto não é um problema, pois esta funcionalidade não é utilizada para obter coordenadas de fantasmas.
 - O predicado `indice(+X, +Y, ?Indice)` realiza os cálculos necessários, a partir das dimensões do tabuleiro, para retornar o índice na lista que representa o estado correspondente às coordenadas dadas.
 - Também foi implementada um predicado que indica se há fantasmas em uma dada coordenada dentre todas as posições indicadas nos parâmetros.
 
@@ -466,7 +466,7 @@ tem_fantasma(X, Y) :- posicao(fantasma, L),
 
 A segunda classe de predicados de utilidade são os predicados que realizam operações sobre os estados. Alguns destes predicados já foram indicados na explicação da implementação da inicialização do problema.
 
-A operação `troca(+Indice, +IndiceNext, +Estado, ?Sucessor)` gera um estado sucessor de `Estado`, trocando os dois elemtnso presentes em `Indice` e `IndiceNext`. Para isso, são realizadas manipulações de listas: primeiramente, monta-se listas com todos os antecessores e sucessores de cada um dos itens a serem trocados. Após isso, realiza-se a troca e junta-se as listas necessárias.
+A operação `troca(+Indice, +IndiceNext, +Estado, ?Sucessor)` gera um estado sucessor de `Estado`, trocando os dois elementos presentes em `Indice` e `IndiceNext`. Para isso, são realizadas manipulações de listas: primeiramente, monta-se listas com todos os antecessores e sucessores de cada um dos itens a serem trocados. Após isso, realiza-se a troca e junta-se as listas necessárias.
 
 ``` prolog
 % % Operacoes sobre o estado
@@ -514,9 +514,9 @@ ListaPosteriorIndiceNext = [e]
 Sucessor = [a, d, c, b, e]
 ```
 
-Outras funções de manipulação do estado, são as funções que comem itens presetnes no tabuleiro. Todos os predicados utilizam a ideia de trocar o item indicado por ''vazio'', gerando, assim, um sucessor em que o elemento foi comido.
+Outras funções de manipulação do estado, são as funções que comem itens presentes no tabuleiro. Todos os predicados utilizam a ideia de trocar o item indicado por ''vazio'', gerando, assim, um sucessor em que o elemento foi comido.
 
-O ponto e a cereja, por serem elementos únicos no tabuleiro, podem ser trocados de forma recursiva, já os fantasmas, que podem ser vários, necessitam de ter suas coordeanadas especificadas, para indicar qual fantasma está sendo comido pelo pacman.
+O ponto e a cereja, por serem elementos únicos no tabuleiro, podem ser trocados de forma recursiva, já os fantasmas, que podem ser vários, necessitam de ter suas coordenadas especificadas, para indicar qual fantasma está sendo comido pelo pacman.
 
 O predicado `come_cereja(+Estado, ?Sucessor)` não é estritamente necessário para a lógica do programa e da busca, porém ele é necessário para uma boa funcionalidade da interface em python.
 
@@ -543,9 +543,9 @@ come_cereja([Cabeca|Cauda], [Cabeca|CaudaNext]) :- come_cereja(Cauda, CaudaNext)
 
 #### Interface Gráfica
 
-Optou-se por implementar a interface gráfica na linguagem Python, por facilidade de manipulação de impressões na tela. Para que os dados gerados pelo programa em Prolog possam ser transportados da execução do código em Prolog para o programa em python, utilizou-se a funcionalidade disponilibizada pela biblioteca _library_, presente do pacote _clib_ do Prolog chamada: `setup_call_cleanup(:Setup, :Goal, :Cleanup)`.
+Optou-se por implementar a interface gráfica na linguagem Python, por facilidade de manipulação de impressões na tela. Para que os dados gerados pelo programa em Prolog possam ser transportados da execução do código em Prolog para o programa em python, utilizou-se a funcionalidade disponilibizada pela biblioteca _process_, presente do pacote _clib_ do Prolog chamada: `setup_call_cleanup(:Setup, :Goal, :Cleanup)`.
 
-Esta chamada gera é utilizada para criar um subprocesso que executa o _script_ em Python responsável pela interface. A entrada padrão do subprocesso Python é um pipe que permitirá a comunicação entre os dois processos.
+Esta chamada é utilizada para criar um subprocesso que executa o _script_ em Python responsável pela interface. A entrada padrão do subprocesso Python é um pipe que permitirá a comunicação entre os dois processos.
 
 Neste pipe, serão escritos todos os estados necessários para a geração da interface.
 
@@ -576,7 +576,7 @@ main(In) :- cria_tabuleiro(Estado),
             escreve_ui(Final, In).
 ```
 
-Primeiramente, escreve-se no pipe as dimensões do tabuleiro sendo utilizado no formato (Largura x Altura). Após isso, realiza-se a busca e utiliza-se um predicado utilitário `escreve_ui(+Lista, +In)` para escrever todo o caminho obtido pele busca no pipe. Os estados são escritos no formato padrão de lista do prolog: `[a, b, c]`.
+Primeiramente, escreve-se no pipe as dimensões do tabuleiro sendo utilizado no formato `(Largura x Altura)`. Após isso, realiza-se a busca e utiliza-se um predicado utilitário `escreve_ui(+Lista, +In)` para escrever todo o caminho obtido pele busca no pipe. Os estados são escritos no formato padrão de lista do prolog: `[a, b, c]`.
 
 ``` prolog
 %% escreve_ui(+Lista, +In)
@@ -596,7 +596,7 @@ dim = dim.split('x')
 dim = [int(axis) for axis in dim]
 ```
 
-Após isso, são lidos todos os estados enviados pelo pipe. Como os estados lidos possuem `[, ] e \n`,  é ralizado um pré-processamento para ignorar estes caracteres. Após isso, é desenhado cada estado, no formato indicado na seção sobre a modelagem dos estados.
+Após isso, são lidos todos os estados enviados pelo pipe. Como os estados lidos possuem `[, ] e \n`,  é realizado um pré-processamento para ignorar estes caracteres. Após isso, é desenhado cada estado, no formato indicado na seção sobre a modelagem dos estados.
 
 Também é realizada uma verificação da presença ou não da cereja no estado. Caso a cereja não esteja presente no estado, isto é, o pacman comeu a cereja, indica que o estado é um estado meta e portanto a interface deve mostrar uma janela de ''Game Over''.
 
@@ -621,7 +621,7 @@ for line in reversed(lines):
 
 ```
 
-A função que desenha o tabuleiro deve se ajustas às dimensões indicadas no início da execução.
+A função que desenha o tabuleiro deve se ajustar às dimensões indicadas no início da execução.
 
 ``` python
 def print_game(dim, line):
