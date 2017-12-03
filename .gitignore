@@ -1,3 +1,7 @@
 *.tar
 *.pdf
 .vscode
+modelos
+emnist
+__pycache__
+*.pyc
