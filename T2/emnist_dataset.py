@@ -2,6 +2,7 @@ from scipy.io import loadmat
 from keras.utils import to_categorical
 from numpy.lib.arraysetops import unique
 import numpy as np
+import os
 
 class EMNISTDataset(object):
 
@@ -24,3 +25,22 @@ class EMNISTDataset(object):
     def get_categorical_labels(self):
         return (to_categorical(self.train_data_labels, num_classes=self.num_classes),
                 to_categorical(self.test_data_labels, num_classes=self.num_classes))
+    
+    def write_arff(self, filename='emnist.arff'):
+        with open(filename, 'w') as arff_file:
+            arff_file.write('@RELATION ' + os.path.basename(filename) + '\n\n')
+
+            class_list = [str(c) for c in np.unique(self.train_data_labels).tolist()]
+            arff_file.write('@ATTRIBUTE Classe {' +
+                            ','.join(class_list) +
+                            '}\n')
+
+            for i in range(self.data_dim):
+                arff_file.write('@ATTRIBUTE A_' + str(i) + ' NUMERIC\n')
+
+            arff_file.write('\n@data\n')
+
+            for (i, _class) in enumerate(self.train_data_labels.tolist()):
+                arff_file.write(str(_class) + ',')
+                instance = [str(x) for x in self.train_data.tolist()[i]]
+                arff_file.write(','.join(instance) + '\n')
