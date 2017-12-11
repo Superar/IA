@@ -5,3 +5,5 @@ modelos
 emnist
 __pycache__
 *.pyc
+*.arff
+*.h5
