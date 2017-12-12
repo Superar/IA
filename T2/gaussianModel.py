@@ -10,8 +10,8 @@ class GaussianModel(object):
         self.dataset = dataset
         self.class_counts = self.get_class_counts()
         self.class_a_priori = self.class_counts / np.sum(self.class_counts)
-        self.class_avg = self.get_class_avg()
-        self.class_variance = self.get_class_variance()
+        self.class_mean = self.get_class_avg()
+        self.variance = self.get_covariance()
 
     def get_class_counts(self):
         counts = np.zeros(self.dataset.num_classes)
@@ -23,7 +23,6 @@ class GaussianModel(object):
 
     def get_class_avg(self):
         avg = np.zeros((self.dataset.num_classes, self.dataset.data_dim))
-        normalized_train = self.dataset.get_normalized_data()[0]
 
         for c in range(avg.shape[0]):
             # Busca todos os índices no vetor de classes que sejam da classe c
@@ -31,34 +30,37 @@ class GaussianModel(object):
                 np.isin(self.dataset.train_data_labels, [c]))[0]
 
             # A partir dos índices, busca as instâncias pertencentes àquela classe
-            instances = normalized_train[instance_indices, :]
+            instances = self.dataset.train_data[instance_indices, :]
             avg[c] = avg[c] + np.sum(instances, axis=0)
 
         return np.array([i / self.class_counts[c] for (c, i) in enumerate(avg)])
 
-    def get_class_variance(self):
-        variance = np.zeros((self.dataset.num_classes, self.dataset.data_dim))
-        normalized_train = self.dataset.get_normalized_data()[0]
+    def get_covariance(self):
+        variance = np.zeros(self.dataset.data_dim)
 
-        for c in range(variance.shape[0]):
+        for c in range(self.dataset.num_classes):
             instance_indices = np.where(
                 np.isin(self.dataset.train_data_labels, [c]))[0]
+            instances = self.dataset.train_data[instance_indices, :]
 
-            instances = normalized_train[instance_indices, :]
-            dist = (instances - self.class_avg[c])**2
-            variance[c] = variance[c] + np.sum(dist, axis=0)
+            dist = (instances - self.class_mean[c])**2
+            variance = variance + np.sum(dist, axis=0)
 
-        return np.array([i / self.class_counts[c] for (c, i) in enumerate(variance)])
+        return variance / self.dataset.train_data.shape[0]
 
     def argmax(self, x):
         p_max = 0
         max_class = -1
         for c in np.unique(self.dataset.train_data_labels):
-            posterior_probability = multivariate_normal(mean=self.class_avg[c],
-                                                        cov=self.class_variance).pdf(x)
+            posterior_probability = self.multivariate_gaussian(self.class_mean[c],
+                                                             self.variance, x)
             priori_probability = self.class_a_priori[c]
-            if (posterior_probability * priori_probability) > p_max:
-                p_max = posterior_probability * priori_probability
+            if (posterior_probability + np.log(priori_probability)) >= p_max:
+                p_max = posterior_probability + \
+                    np.log(priori_probability)
                 max_class = c
-
         return max_class
+
+    @staticmethod
+    def multivariate_gaussian(mean, cov, x):
+        return -0.5 * np.sum((x - mean)**2 / cov) + np.sum(np.log(np.pi * cov))
