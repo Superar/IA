@@ -3,13 +3,15 @@
 from usps_dataset import USPSDataset
 from gaussianModel import GaussianModel
 import matplotlib.pyplot as plt
+import numpy as np
 
 usps_dataset = USPSDataset('usps/usps.train', 'usps/usps.test')
-
 model = GaussianModel(usps_dataset)
 
-print(model.argmax(usps_dataset.test_data[0]))
+corretos = 0
 
-plt.figure(1)
-plt.imshow(model.class_variance[0].reshape((16, 16)), cmap='gray', vmin=0, vmax=1, interpolation='none')
-plt.show()
+for i, data in enumerate(usps_dataset.test_data):
+    if usps_dataset.test_data_labels[i] == model.argmax(data):
+        corretos = corretos + 1
+
+print("{}%".format((corretos / usps_dataset.test_data.shape[0]) * 100))
